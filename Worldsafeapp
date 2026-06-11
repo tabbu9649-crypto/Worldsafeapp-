@@ -1,0 +1,161 @@
+import flet as ft
+
+def main(page: ft.Page):
+    page.title = "WORLD SAFE APP"
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.scroll = ft.ScrollMode.AUTO
+    page.theme_mode = ft.ThemeMode.LIGHT 
+    page.padding = 10
+
+    # ==========================================
+    # 🛡️ WORLD SAFE FIREWALL & PREMIUM BANNER
+    # ==========================================
+    firewall_banner = ft.Container(
+        content=ft.Row([ft.Text("🟢", size=14), ft.Text("WorldSafe Firewall: ACTIVE & SECURE", color="green", weight="bold", size=12)], alignment=ft.MainAxisAlignment.CENTER),
+        bgcolor="#e8f5e9", padding=8, border_radius=10, width=320
+    )
+
+    premium_banner = ft.Card(
+        content=ft.Container(
+            content=ft.Column([
+                ft.Text("👑 World Safe Premium", size=16, weight="bold", color="#d4af37"),
+                ft.Text("Unlimited Scans • AI Detector • No Ads", size=11, color="white"),
+                ft.ElevatedButton("Upgrade Now - ₹199/month", bgcolor="white", color="black", width=250)
+            ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+            bgcolor="#111111", padding=15, border_radius=10, width=320
+        )
+    )
+
+    # ==========================================
+    # 🌙 DARK MODE & FUNCTIONS
+    # ==========================================
+    def toggle_theme(e):
+        if page.theme_mode == ft.ThemeMode.LIGHT:
+            page.theme_mode = ft.ThemeMode.DARK
+            theme_text.value = "Light Mode"
+            theme_icon.value = "☀️"
+            firewall_banner.bgcolor = "#1b5e20"
+        else:
+            page.theme_mode = ft.ThemeMode.LIGHT
+            theme_text.value = "Dark Mode"
+            theme_icon.value = "🌙"
+            firewall_banner.bgcolor = "#e8f5e9"
+        page.update()
+
+    def mock_file_upload(e):
+        file_name.value = "✅ Selected: scam_screenshot.jpg"
+        file_name.color = "green"
+        page.update()
+
+    def close_dlg(e):
+        article_dlg.open = False
+        page.update()
+
+    article_dlg = ft.AlertDialog(title=ft.Text("", weight="bold", color="red"), content=ft.Text(""), actions=[ft.TextButton("Got It! 👍", on_click=close_dlg)])
+
+    def show_article(title, text):
+        page.dialog = article_dlg
+        article_dlg.title.value = title
+        article_dlg.content.value = text
+        article_dlg.open = True
+        page.update()
+
+    def check_scam(e):
+        data = scan_input.value.strip().lower()
+        dangerous = ["free", "lottery", "recharge", "win", ".apk", "kyc"]
+        if not data:
+            scan_result.value = "⚠️ Please enter a Link or UPI ID!"
+            scan_result.color = "orange"
+        elif any(w in data for w in dangerous):
+            scan_result.value = f"🚨 SCAM ALERT: Fraud hone ka khatra hai!"
+            scan_result.color = "red"
+        elif "http" in data or ".com" in data:
+            scan_result.value = "🔍 SAFE: Yeh link safe lag raha hai."
+            scan_result.color = "green"
+        else:
+            scan_result.value = f"✅ Database Checked: Koi scam report nahi hai."
+            scan_result.color = "green"
+        page.update()
+
+    def submit_report(e):
+        if not report_target.value or not report_details.value:
+            report_status.value = "⚠️ Saari details bharein!"
+            report_status.color = "orange"
+        else:
+            report_status.value = f"✅ Success: Report Save Ho Gayi!"
+            report_status.color = "green"
+            report_target.value = ""
+            report_details.value = ""
+            file_name.value = "No Screenshot attached"
+            file_name.color = "grey"
+        page.update()
+
+    # ==========================================
+    # 🎨 SCREENS SETUP
+    # ==========================================
+    scan_input = ft.TextField(hint_text="Phone, URL, Email, UPI...", width=300, border_radius=10)
+    scan_result = ft.Text("", size=14, weight="bold", text_align=ft.TextAlign.CENTER)
+    report_target = ft.TextField(hint_text="Scam Number / Website...", width=300)
+    report_type = ft.Dropdown(options=[ft.dropdown.Option("OTP Fraud"), ft.dropdown.Option("UPI Scam"), ft.dropdown.Option("Job Scam")], width=300, hint_text="Scam Type")
+    report_details = ft.TextField(hint_text="Scam ki details...", multiline=True, width=300)
+    report_status = ft.Text("", size=14, weight="bold", text_align=ft.TextAlign.CENTER)
+    file_name = ft.Text("No Screenshot attached", size=12, italic=True, color="grey")
+    disclaimer_text = ft.Text("⚠️ Disclaimer: World Safe App is NOT affiliated with any Government or Police department.", size=11, color="grey", text_align=ft.TextAlign.CENTER, italic=True)
+
+    # 🏠 HOME SCREEN
+    view_home = ft.Column([
+        ft.Text("🛡️ WORLD SAFE", size=30, weight="bold", color="red"),
+        ft.Text("Your Digital Bodyguard", size=12, italic=True),
+        premium_banner, 
+        firewall_banner,
+        ft.Divider(),
+        ft.ElevatedButton("🔍 Search Number", width=300, on_click=lambda e: nav_click(1)),
+        ft.ElevatedButton("🌐 Check Website", width=300, on_click=lambda e: nav_click(1)),
+        ft.ElevatedButton("🚨 Emergency Report", width=300, bgcolor="red", color="white", on_click=lambda e: nav_click(2)),
+        ft.Divider(),
+        ft.Text("📰 Latest Scam Alerts", size=18, weight="bold"),
+        ft.Card(content=ft.Container(padding=10, content=ft.Text("🚨 WhatsApp Pink Scam Active! Bachaav karein."))),
+        ft.Divider(), disclaimer_text
+    ], visible=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+
+    # 🔎 SCANNER & 🚨 REPORT & 📚 LEARN
+    view_scan = ft.Column([ft.Text("🔎 Universal Scanner", size=22, weight="bold", color="blue"), scan_input, ft.ElevatedButton("Scan Now", width=200, on_click=check_scam, bgcolor="blue", color="white"), ft.Container(content=scan_result, padding=10)], visible=False, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+    view_report = ft.Column([ft.Text("🚨 Report a Scam", size=22, weight="bold", color="red"), report_target, report_type, report_details, ft.ElevatedButton("📸 Upload Screenshot", width=300, on_click=mock_file_upload), file_name, ft.ElevatedButton("Submit Report", bgcolor="red", color="white", width=300, on_click=submit_report), ft.Container(content=report_status, padding=10)], visible=False, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+    view_learn = ft.Column([ft.Text("📚 Cyber Education", size=22, weight="bold", color="green"), ft.ListTile(leading=ft.Text("🛡️", size=24), title=ft.Text("OTP Fraud"), on_click=lambda e: show_article("OTP Fraud", "Apna OTP kisi ko na dein!")), ft.ListTile(leading=ft.Text("💳", size=24), title=ft.Text("UPI Scam"), on_click=lambda e: show_article("UPI Scam", "Paisa receive karne ke liye PIN nahi daalna padta.")), ft.ListTile(leading=ft.Text("💼", size=24), title=ft.Text("Fake Job Offers"), on_click=lambda e: show_article("Fake Job", "Security deposit maange, toh wo scam hai."))], visible=False, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+
+    # 👤 PROFILE SECTION
+    theme_text = ft.Text("Dark Mode")
+    theme_icon = ft.Text("🌙", size=24)
+    view_profile = ft.Column([
+        ft.Text("👤 My Account", size=22, weight="bold"),
+        ft.ListTile(leading=ft.Text("⚙️", size=24), title=ft.Text("User Details")),
+        ft.Divider(),
+        ft.Text("Current Plan: FREE", weight="bold", color="grey"),
+        ft.ListTile(leading=ft.Text("⬆️", size=24), title=ft.Text("Upgrade to Premium (₹199/m)", color="#d4af37", weight="bold")),
+        ft.ListTile(leading=ft.Text("👨‍👩‍👧", size=24), title=ft.Text("Family Plan (₹399/m)")),
+        ft.ListTile(leading=ft.Text("🎁", size=24), title=ft.Text("Refer & Earn (1 Month Free)")),
+        ft.Divider(),
+        ft.ListTile(leading=theme_icon, title=theme_text, on_click=toggle_theme), 
+        ft.Divider(), disclaimer_text
+    ], visible=False, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+
+    # ==========================================
+    # 🧭 BOTTOM NAVIGATION
+    # ==========================================
+    def nav_click(index):
+        view_home.visible = (index == 0)
+        view_scan.visible = (index == 1)
+        view_report.visible = (index == 2)
+        view_learn.visible = (index == 3)
+        view_profile.visible = (index == 4)
+        for i in range(5): nav_items[i].content.controls[1].color = "blue" if index == i else "grey"
+        page.update()
+
+    def create_nav_item(text, emoji, index, is_active=False):
+        color = "blue" if is_active else "grey"
+        return ft.Container(content=ft.Column([ft.Text(emoji, size=24, text_align=ft.TextAlign.CENTER), ft.Text(text, size=10, weight="bold", color=color, text_align=ft.TextAlign.CENTER)], alignment=ft.MainAxisAlignment.CENTER, spacing=2), on_click=lambda e: nav_click(index), padding=5)
+
+    nav_items = [create_nav_item("Home", "🏠", 0, True), create_nav_item("Scan", "🔎", 1), create_nav_item("Report", "🚨", 2), create_nav_item("Learn", "📚", 3), create_nav_item("Profile", "👤", 4)]
+    page.add(ft.Container(content=ft.Row(nav_items, alignment=ft.MainAxisAlignment.SPACE_EVENLY), bgcolor="#f0f0f0", padding=5, border_radius=20), ft.Divider(thickness=2), view_home, view_scan, view_report, view_learn, view_profile)
+
+ft.run(main, view=ft.AppView.WEB_BROWSER, port=8000)
